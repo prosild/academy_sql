@@ -52,7 +52,7 @@ SELECT e.EMPNO
 SELECT e.EMPNO
      , e.ENAME
      , e.COMM
-  FROM emp e
+  FROM EMP e
  ORDER BY COMM
 ;
 
@@ -75,7 +75,7 @@ SELECT e.EMPNO
 SELECT e.EMPNO
      , e.ENAME
      , e.COMM
-  FROM emp e
+  FROM EMP e
  ORDER BY COMM DESC
 ;
 
@@ -95,11 +95,11 @@ SELECT e.EMPNO
 --------------------*/
 
 -- 5)
-SELECT e.EMPNO    as "사번"
-     , e.ENAME    as "이름"
-     , e.SAL      as "급여"
+SELECT e.EMPNO as "사번"
+     , e.ENAME as "이름"
+     , e.SAL as "급여"
      , e.HIREDATE as "입사일"
-  FROM emp e
+  FROM EMP e
 ;
 
 /*------------------------------
@@ -245,3 +245,149 @@ SELECT e.EMPNO
      , e.SAL + e.COMM
   FROM emp e
 ;
+
+/*---------------------------------
+7369	SMITH	CLERK	
+7499	ALLEN	SALESMAN	1900
+7521	WARD	SALESMAN	1750
+7566	JONES	MANAGER	
+7654	MARTIN	SALESMAN	2650
+7698	BLAKE	MANAGER	
+7782	CLARK	MANAGER	
+7839	KING	PRESIDENT	
+7844	TURNER	SALESMAN	1500
+7900	JAMES	CLERK	
+7902	FORD	ANALYST	
+7934	MILLER	CLERK	
+----------------------------------*/
+
+-- 14)
+SELECT *
+  FROM emp e
+ WHERE e.COMM != 0
+;
+
+SELECT *
+  FROM emp e
+ WHERE e.COMM <> 0
+;
+
+SELECT *
+  FROM emp e
+ WHERE NOT e.COMM = 0
+;
+
+/*-----------------------------------------------------------------
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	    30
+7521	WARD	SALESMAN	7698	81/02/22	1250	500	    30
+7654	MARTIN	SALESMAN	7698	81/09/28	1250	1400	30
+------------------------------------------------------------------*/
+
+-- 15)
+SELECT *
+  FROM emp e
+ WHERE e.COMM IS NOT NULL
+;
+
+/*------------------------------------------------------------------
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	    30
+7521	WARD	SALESMAN	7698	81/02/22	1250	500	    30
+7654	MARTIN	SALESMAN	7698	81/09/28	1250	1400	30
+7844	TURNER	SALESMAN	7698	81/09/08	1500	0   	30
+--------------------------------------------------------------------*/
+
+-- 16)
+SELECT *
+  FROM emp e
+ WHERE e.DEPTNO = 20
+   AND e.SAL > 2500
+;
+
+/*------------------------------------------------------------
+7566	JONES	MANAGER	7839	81/04/02	2975		20
+7902	FORD	ANALYST	7566	81/12/03	3000		20
+------------------------------------------------------------*/
+
+-- 17)
+SELECT *
+  FROM emp e
+ WHERE e.JOB = 'MANAGER'
+    OR e.DEPTNO = 10
+;
+
+/*-----------------------------------------------------------
+JONES	MANAGER	7566	7839	81/04/02	2975		20
+BLAKE	MANAGER	7698	7839	81/05/01	2850		30
+CLARK	MANAGER	7782	7839	81/06/09	2450		10
+KING	PRESIDENT	7839		81/11/17	5000		10
+MILLER	CLERK	7934	7782	82/01/23	1300		10
+------------------------------------------------------------*/
+
+-- 18)
+SELECT *
+  FROM emp e
+ WHERE e.JOB IN('MANAGER', 'CLERK', 'SALESMAN')
+;
+
+/*---------------------------------------------------------------------
+7369	SMITH	CLERK   	7902	80/12/17	800	        	20
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	    30
+7521	WARD	SALESMAN	7698	81/02/22	1250	500	    30
+7566	JONES	MANAGER 	7839	81/04/02	2975		    20
+7654	MARTIN	SALESMAN	7698	81/09/28	1250	1400	30
+7698	BLAKE	MANAGER	    7839	81/05/01	2850	      	30
+7782	CLARK	MANAGER	    7839	81/06/09	2450	       	10
+7844	TURNER	SALESMAN	7698	81/09/08	1500	0	    30
+7900	JAMES	CLERK	    7698	81/12/03	950	            30
+7934	MILLER	CLERK	    7782	82/01/23	1300	        10
+--------------------------------------------------------------------*/
+
+-- 19)
+SELECT *
+  FROM emp e
+ WHERE e.ENAME LIKE 'A%'
+;
+
+/*----------------------------------------------------------------
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	30
+-----------------------------------------------------------------*/
+
+-- 20)
+SELECT *
+  FROM emp e
+ WHERE e.ENAME LIKE '%A%'
+;
+
+/*------------------------------------------------------------------
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	    30
+7521	WARD	SALESMAN	7698	81/02/22	1250	500	    30
+7654	MARTIN	SALESMAN	7698	81/09/28	1250	1400	30
+7698	BLAKE	MANAGER	    7839	81/05/01	2850		    30
+7782	CLARK	MANAGER	    7839	81/06/09	2450		    10
+7900	JAMES	CLERK	    7698	81/12/03	950		        30
+--------------------------------------------------------------------*/
+
+-- 21)
+SELECT *
+  FROM emp e
+WHERE e.ENAME LIKE '%S'
+;
+
+/*-------------------------------------------------------------
+7566	JONES	MANAGER	7839	81/04/02	2975		20
+7900	JAMES	CLERK	7698	81/12/03	950		    30
+-------------------------------------------------------------*/
+
+-- 22)
+SELECT *
+  FROM emp e
+ WHERE e.ENAME LIKE '%E_'
+;
+
+/*-------------------------------------------------------------
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	30
+7566	JONES	MANAGER	    7839	81/04/02	2975		20
+7844	TURNER	SALESMAN	7698	81/09/08	1500	0	30
+7900	JAMES	CLERK	    7698	81/12/03	950		    30
+7934	MILLER	CLERK	    7782	82/01/23	1300		10
+--------------------------------------------------------------*/
