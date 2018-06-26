@@ -52,7 +52,7 @@ SELECT e.EMPNO
 SELECT e.EMPNO
      , e.ENAME
      , e.COMM
-  FROM EMP e
+  FROM emp e
  ORDER BY COMM
 ;
 
@@ -75,7 +75,7 @@ SELECT e.EMPNO
 SELECT e.EMPNO
      , e.ENAME
      , e.COMM
-  FROM EMP e
+  FROM emp e
  ORDER BY COMM DESC
 ;
 
@@ -95,11 +95,11 @@ SELECT e.EMPNO
 --------------------*/
 
 -- 5)
-SELECT e.EMPNO as "사번"
-     , e.ENAME as "이름"
-     , e.SAL as "급여"
+SELECT e.EMPNO    as "사번"
+     , e.ENAME    as "이름"
+     , e.SAL      as "급여"
      , e.HIREDATE as "입사일"
-  FROM EMP e
+  FROM emp e
 ;
 
 /*------------------------------
@@ -118,3 +118,130 @@ SELECT e.EMPNO as "사번"
 7902	FORD	3000	81/12/03
 7934	MILLER	1300	82/01/23
 -------------------------------*/
+
+-- 6)
+SELECT *
+  FROM emp
+;
+
+/*------------------------------------------------------------------
+7369	SMITH	CLERK	    7902	80/12/17	800		        20
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300 	30
+7521	WARD	SALESMAN	7698	81/02/22	1250	500 	30
+7566	JONES	MANAGER 	7839	81/04/02	2975		    20
+7654	MARTIN	SALESMAN	7698	81/09/28	1250	1400	30
+7698	BLAKE	MANAGER	    7839	81/05/01	2850		    30
+7782	CLARK	MANAGER	    7839	81/06/09	2450		    10
+7839	KING	PRESIDENT		    81/11/17	5000		    10
+7844	TURNER	SALESMAN	7698	81/09/08	1500	0	    30
+7900	JAMES	CLERK	    7698	81/12/03	950		        30
+7902	FORD	ANALYST	    7566	81/12/03	3000		    20
+7934	MILLER	CLERK	    7782	82/01/23	1300		    10
+--------------------------------------------------------------------*/
+
+-- 7)
+SELECT *
+  FROM emp e
+ WHERE e.ENAME = 'ALLEN'
+;
+
+/*------------------------------------------------------------------
+7499	ALLEN	SALESMAN	7698	81/02/20	1600	300	    30
+-------------------------------------------------------------------*/
+
+-- 8)
+SELECT e.EMPNO
+     , e.ENAME
+     , e.DEPTNO
+  FROM emp e
+ WHERE e.DEPTNO = 20
+;
+
+/*-----------------
+7369	SMITH	20
+7566	JONES	20
+7902	FORD	20
+------------------*/
+
+-- 9)
+SELECT e.EMPNO
+     , e.ENAME
+     , e.SAL
+     , e.DEPTNO
+  FROM emp e
+ WHERE e.DEPTNO = 20
+   AND e.SAL < 3000
+;
+
+/*-------------------------
+7369	SMITH	800	    20
+7566	JONES	2975	20
+--------------------------*/
+
+-- 10)
+SELECT e.EMPNO
+     , e.ENAME
+     , e.SAL + e.COMM
+  FROM emp e
+;
+
+/*------------------
+7369	SMITH	
+7499	ALLEN	1900
+7521	WARD	1750
+7566	JONES	
+7654	MARTIN	2650
+7698	BLAKE	
+7782	CLARK	
+7839	KING	
+7844	TURNER	1500
+7900	JAMES	
+7902	FORD	
+7934	MILLER	
+-------------------*/
+
+-- 11)
+SELECT e.EMPNO
+     , e.ENAME
+     , e.SAL * 12
+  FROM emp e
+;
+
+/*---------------------
+7369	SMITH	9600
+7499	ALLEN	19200
+7521	WARD	15000
+7566	JONES	35700
+7654	MARTIN	15000
+7698	BLAKE	34200
+7782	CLARK	29400
+7839	KING	60000
+7844	TURNER	18000
+7900	JAMES	11400
+7902	FORD	36000
+7934	MILLER	15600
+---------------------*/
+
+-- 12)
+SELECT e.EMPNO
+     , e.ENAME
+     , e.JOB
+     , e.SAL
+     , e.COMM
+  FROM emp e
+ WHERE e.ENAME = 'MARTIN'
+    OR e.ENAME = 'BLAKE'
+;
+
+/*---------------------------------------
+7654	MARTIN	SALESMAN	1250	1400
+7698	BLAKE	MANAGER	    2850
+----------------------------------------*/
+
+-- 13)
+SELECT e.EMPNO
+     , e.ENAME
+     , e.JOB
+     , e.SAL + e.COMM
+  FROM emp e
+;
