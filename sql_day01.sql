@@ -674,5 +674,3 @@ SELECT e.EMPNO
   FROM emp e
  WHERE e.ENAME LIKE 'J\%%' ESCAPE'\'
 ;
-
--- 6/26 오후 6시까지
