@@ -640,3 +640,212 @@ SELECT nullif('AAA', 'AAA')
 -- 조회된 결과 1행이 NULL인 결과를 얻게 됨
 -- 1행이라도 NULL이 조회된 결과는 인출된 모든 행 : 0과는 상태가 다름!
 
+--  3) 날짜함수 : 날짜 출력 패턴 조합으로 다양하게 출력 가능
+SELECT sysdate FROM dual;
+
+-- TO_CHAR() : 숫자나 날짜를 문자형으로 변환
+SELECT to_char(sysdate, 'YYYY') FROM dual;
+SELECT to_char(sysdate, 'YY') FROM dual;
+SELECT to_char(sysdate, 'MM') FROM dual;
+SELECT to_char(sysdate, 'MONTH') FROM dual;
+SELECT to_char(sysdate, 'MON') FROM dual;
+SELECT to_char(sysdate, 'DD') FROM dual;
+SELECT to_char(sysdate, 'D') FROM dual;
+SELECT to_char(sysdate, 'DAY') FROM dual;
+SELECT to_char(sysdate, 'DY') FROM dual;
+
+-- 패턴을 조합
+SELECT to_char(sysdate, 'YYYY-MM-DD') FROM dual;
+SELECT to_char(sysdate, 'FMYYYY-MM-DD') FROM dual;
+SELECT to_char(sysdate, 'YY-MONTH-DD') FROM dual;
+SELECT to_char(sysdate, 'YY-MONTH-DD DAY') FROM dual;
+SELECT to_char(sysdate, 'YY-MONTH-DD DY') FROM dual;
+
+/* 시간 패턴 : 
+    HH : 시간을 두자리로 표기
+    MI : 분을 두자리로 표기
+    SS : 초를 두자리로 표기
+    HH24 : 시간을 24시간 체계로 표기
+*/
+SELECT to_char(sysdate, 'YYYY-MM-DD HH24:MI:SS') FROM dual;
+SELECT to_char(sysdate, 'YYYY-MM-DD AM HH24:MI:SS') FROM dual;
+
+-- 날짜 값과 숫자의 연산 : +, -, 연산 가능
+-- 10일 후
+SELECT sysdate + 10 FROM dual;
+-- 10일 전
+SELECT sysdate - 10 FROM dual;
+-- 10시간 후
+SELECT sysdate + (10/24) FROM dual;
+SELECT to_char(sysdate + (10/24), 'YY-MM-DD HH24:MI:SS') FROM dual;
+
+--   1. MONTHS_BETWEEN(날짜1, 날짜2) : 두 날짜 사이의 달의 차이
+SELECT months_between(sysdate, e.HIREDATE) FROM emp e;
+
+--   2. ADD_MONTHS(날짜, 숫자) : 날짜에 숫자 만큼 더한 후의 날짜를 구함
+SELECT add_months(sysdate, 3) FROM dual;
+
+--   3. NEXT_DAY, LAST_DAY : 다음 요일에 해당하는 날짜 구함, 이 달의 마지막 날짜
+SELECT next_day(sysdate, '목요일') FROM dual; -- 요일을 문자로 입력했을 때
+SELECT next_day(sysdate, 1) from dual;        -- 요일을 숫자로 입력해도 작동
+SELECT last_day(sysdate) FROM dual;
+
+--   4. ROUND, TRUNC : 날짜 관련 반올림, 버림
+SELECT round(sysdate) FROM dual;
+SELECT to_char(round(sysdate), 'YYYY-MM-DD HH24:MI:SS') FROM dual;
+SELECT trunc(sysdate) FROM dual;
+SELECT to_char(trunc(sysdate), 'YYYY-MM-DD HH24:MI:SS') FROM dual;
+
+--  4) 데이터 타입 변환 함수
+/*
+  TO_CHAR()     : 숫자, 날짜 ==> 문자
+  TO_DATE()     : 날짜 형식의 문자 ==> 날짜
+  TO_NUMBER()   : 숫자로만 구성된 문자데이터 ==> 숫자
+*/
+
+--   1. TO_CHAR() : 숫자패턴 적용
+--     숫자패턴 : 9 ===> 한자리 숫자
+SELECT to_char(12345, '9999') FROM dual;
+SELECT to_char(12345, '99999') FROM dual;
+-- 숫자를 문자화하여 표현
+SELECT to_char(12345, '99999999') as "data"
+  FROM dual
+;
+-- 앞에 빈칸을 0으로 채우기
+SELECT to_char(12345, '09999999') as "data"
+  FROM dual
+;
+-- 소수점 이하 표현
+SELECT to_char(12345, '9999999.99') as "data"
+  FROM dual
+;
+-- 숫자 패턴에서 3자리씩 끊어 읽기 + 소수점 이하 표현
+SELECT to_char(12345, '9,999,999.99') as "data"
+  FROM dual
+;
+
+--   2. TO_DATE() : 날짜 패턴에 맞는 문자 값을 날짜 데이터로 변경
+SELECT TO_DATE('2018-06-27', 'YYYY-MM-DD') + 10 as "today" FROM dual;
+-- 10일 후 날짜 연산 결과 얻음 : 18/07/07
+SELECT '2018-06-27' + 10 as "today" FROM dual;
+-- ORA-01722: invalid number ==> '2018-06-27' 문자 + 숫자 10의 연산 불가능
+
+--   3. TO_NUMBER() : 오라클이 자동 형변환을 제공하므로 자주 사용은 안됨
+SELECT '1000' + 10 result FROM dual;
+SELECT to_number('1000') + 10 result FROM dual;
+
+--  5) DECODE(expr, search, result [,search, result].. [, default])
+/*
+   만약에 default가 설정이 안되었고
+   expr과 일치하는 search가 없는 경우 null을 리턴
+*/
+SELECT DECODE('YES' -- expr
+            , 'YES', '입력값이 YES입니다.' -- search, result 세트1
+            , 'NO', '입력값이 NO입니다.'   -- search, result 세트2
+            ) as "result"
+  FROM dual
+;
+
+SELECT DECODE('NO' -- expr
+            , 'YES', '입력값이 YES입니다.' -- search, result 세트1
+            , 'NO', '입력값이 NO입니다.'   -- search, result 세트2
+            ) as "result"
+  FROM dual
+;
+
+SELECT DECODE('예' -- expr
+            , 'YES', '입력값이 YES입니다.' -- search, result 세트1
+            , 'NO', '입력값이 NO입니다.'   -- search, result 세트2
+            ) as "result"
+  FROM dual
+;
+-->> expr과 일치하는 search가 없고, default 설정도 안되었을 때
+--   결과가 <인출된 모든 행 : 0> 이 아닌 NULL 이라는 것 확인
+
+SELECT DECODE('예' -- expr
+            , 'YES', '입력값이 YES입니다.' -- search, result 세트1
+            , 'NO', '입력값이 NO입니다.'   -- search, result 세트2
+            , '입력값이 YES/NO중 어느것도 아닙니다.') as "result" -- default
+  FROM dual
+;
+
+--  emp테이블의 hiredate의 입사년도를 추출하여 몇 년 근무했는지를 계산
+--  장기근속 여부를 판단
+--  1) 입사년도 추출 : 날짜 패턴
+SELECT e.EMPNO
+     , e.ENAME
+     , to_char(e.HIREDATE, 'YYYY') as "hireyear"
+  FROM emp e
+;
+--  2) 몇 년 근무 판단 : 오늘 시스템 날짜와 연산
+SELECT e.EMPNO
+     , e.ENAME
+     , to_char(sysdate, 'YYYY') - to_char(e.HIREDATE, 'YYYY') as "근무 햇수"
+  FROM emp e
+;
+
+--  3) 37년 이상 된 직원을 장기 근속을 판단
+SELECT a.EMPNO
+     , a.ENAME
+     , DECODE(a.workingyear
+            , 37, '장기 근속자 입니다.' -- search, result1
+            , 38, '장기 근속자 입니다.' -- search, result 2
+            , '장기 근속자가 아닙니다.') as "장기 근속 여부" -- default1
+  FROM (SELECT e.EMPNO
+             , e.ENAME
+             , to_char(sysdate, 'YYYY') - to_char(e.HIREDATE, 'YYYY') workingyear
+          FROM emp e) a
+;
+
+--  job별로 경조사비를 급여대비 일정 비율로 지급하고 있다.
+--  각 직원들의 경조사비 지원금을 구하자
+/*
+    CLERK     : 5%
+    SALESMAN  : 4%
+    MANAGER   : 3.7%
+    ANALYST   : 3%
+    PRESIDENT : 1.5%
+*/
+SELECT e.EMPNO
+     , e.ENAME
+     , e.JOB
+     , DECODE(e.JOB  -- expr
+            , 'CLERK', e.SAL * 0.05  -- search, result
+            , 'SALESMAN', e.SAL * 0.04
+            , 'MANAGER', e.SAL * 0.037
+            , 'ANALYST', e.SAL * 0.03
+            , 'PRESIDENT', e.SAL * 0.015) "경조사비 지원금"
+  FROM emp e
+;
+
+-- 출력 결과에 숫자 패턴 적용
+SELECT e.EMPNO
+     , e.ENAME
+     , e.JOB
+     , to_char(DECODE(e.JOB  -- expr
+                    , 'CLERK', e.SAL * 0.05  -- search, result
+                    , 'SALESMAN', e.SAL * 0.04
+                    , 'MANAGER', e.SAL * 0.037
+                    , 'ANALYST', e.SAL * 0.03
+                    , 'PRESIDENT', e.SAL * 0.015), '$999.99') "경조사비 지원금"
+  FROM emp e
+;
+
+/*------------------------------------
+9999	J_JUNE	CLERK	      $25.00
+7369	SMITH	CLERK	      $40.00
+7499	ALLEN	SALESMAN	  $64.00
+7521	WARD	SALESMAN	  $50.00
+7566	JONES	MANAGER	      $110.08
+7654	MARTIN	SALESMAN	  $50.00
+7698	BLAKE	MANAGER 	  $105.45
+7782	CLARK	MANAGER	      $90.65
+7839	KING	PRESIDENT	  $75.00
+7844	TURNER	SALESMAN	  $60.00
+7900	JAMES	CLERK	      $47.50
+7902	FORD	ANALYST	      $90.00
+7934	MILLER	CLERK	      $65.00
+8888	J	    CLERK   	  $20.00
+7777	J%JONES	CLERK	      $15.00
+-------------------------------------*/
+
