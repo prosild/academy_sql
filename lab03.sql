@@ -147,6 +147,94 @@ SELECT VARIANCE(e.SAL) as "급여 분산"
 -- 26)
 -- CLERK    SALESMAN    MANAGER    ANALYST    PRESIDENT
 -- 300      450         600        800        1000
-SELECT 
+SELECT e.DEPTNO as "부서 번호"
+       , SUM(DECODE(e.JOB 
+            , 'CLERK', 300
+            , 'SALESMAN', 450
+            , 'MANAGER', 600
+            , 'ANALYST', 800
+            , 'PRESIDENT', 1000)) as "자기 계발비"
   FROM emp e
+ GROUP BY e.DEPTNO
 ;
+/*---------------------
+부서 번호, 자기 계발비
+-----------------------
+            900
+30	        2700
+20	        1700
+10	        1900
+----------------------*/
+
+-- 27)
+SELECT e.DEPTNO as "부서 번호"
+     , e.JOB    as "직책"
+     , SUM(DECODE(e.JOB 
+            , 'CLERK', 300
+            , 'SALESMAN', 450
+            , 'MANAGER', 600
+            , 'ANALYST', 800
+            , 'PRESIDENT', 1000)) as "자기 계발비"
+  FROM emp e
+ WHERE e.DEPTNO IS NOT NULL
+   AND e.JOB IS NOT NULL
+ GROUP BY e.DEPTNO, e.JOB
+ ORDER BY e.DEPTNO ASC, e.JOB DESC
+;
+/*---------------------------------
+부서 번호,  직책,      자기 계발비
+--------------------------
+10	        PRESIDENT	1000
+10	        MANAGER	    600
+10	        CLERK	    300
+20	        MANAGER 	600
+20	        CLERK	    300
+20	        ANALYST	    800
+30	        SALESMAN	1800
+30	        MANAGER	    600
+30	        CLERK	    300
+----------------------------------*/
+
+-- 조인
+-- 1)
+SELECT e.ENAME, d.DNAME
+  FROM emp e NATURAL JOIN dept d
+;
+/*------------------
+ENAME,  DNAME
+--------------------
+SMITH	RESEARCH
+ALLEN	SALES
+WARD	SALES
+JONES	RESEARCH
+MARTIN	SALES
+BLAKE	SALES
+CLARK	ACCOUNTING
+KING	ACCOUNTING
+TURNER	SALES
+JAMES	SALES
+FORD	RESEARCH
+MILLER	ACCOUNTING
+------------------*/
+
+-- 2)
+SELECT e.ENAME
+     , d.DNAME
+  FROM emp e JOIN dept d USING (deptno)
+;
+/*-----------------
+ENAME,  DNAME
+-------------------
+SMITH	RESEARCH
+ALLEN	SALES
+WARD	SALES
+JONES	RESEARCH
+MARTIN	SALES
+BLAKE	SALES
+CLARK	ACCOUNTING
+KING	ACCOUNTING
+TURNER	SALES
+JAMES	SALES
+FORD	RESEARCH
+MILLER	ACCOUNTING
+------------------*/
