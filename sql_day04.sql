@@ -285,12 +285,25 @@ SELECT e1.EMPNO
                    FROM emp e
                   GROUP BY e.JOB)
 ;
---> WHERE 절에서 비교는 e.SAL은 1행당 비교
---  그런데 서브쿼리에서 돌아오는 값은 총 6행
---  1행과 6행은 비교 자체가 불가능
+--> WHERE 절에서 비교는 e.SAL은 한개의 컬럼
+--  그런데 서브쿼리에서 돌아오는 것이 2개의 컬럼이라 비교 불가능
+
+SELECT e.EMPNO
+     , e.ENAME
+     , e.JOB
+     , e.SAL
+  FROM emp e
+ WHERE e.SAL = (SELECT MAX(e.SAL)
+                   FROM emp e
+                  GROUP BY e.JOB)
+;
+-- ORA-01427: single-row subquery returns more than one row
+/*
+  WHERE 조건에 있는 e.SAL은 1행을 비교하기 위한 값인데
+  서브쿼리 전달되는 내용은 6행이라 비교가 불가능
+*/
 
 --> IN 연산자를 사용하여 해결
-
 SELECT e.EMPNO
      , e.ENAME
      , e.JOB
@@ -308,9 +321,39 @@ SELECT e1.EMPNO
      , e1.SAL
   FROM emp e1
  WHERE e1.SAL = (SELECT MAX(e2.SAL)
-                  FROM emp e2
-                 WHERE e1.JOB = e2.JOB)
+                   FROM emp e2
+                  WHERE e1.JOB = e2.JOB)
 ;
 
 -- 4. 각 월별 입사인원을 세로로 출력
+-- a) 입사일 데이터에서 월을 추출
+SELECT TO_CHAR(e.HIREDATE, 'FMMM')
+  FROM emp e
+;
 
+-- b) 입사 월별 인원 => 그룹화 기준 월
+--    인원을 구하는 함수 => COUNT(*)
+SELECT TO_CHAR(e.HIREDATE, 'FMMM')
+     , COUNT(*)
+  FROM emp e
+ GROUP BY TO_CHAR(e.HIREDATE, 'FMMM')
+;
+
+-- c) 입사 월 순으로 정렬
+SELECT TO_NUMBER(TO_CHAR(e.HIREDATE, 'FMMM')) || '월' as "입사 월"
+     , COUNT(*) as "인원 수"
+  FROM emp e
+ GROUP BY TO_CHAR(e.HIREDATE, 'FMMM')
+ ORDER BY "입사 월"
+;
+--> '월'을 붙이면 다시 문자화 되어 정렬이 망가짐
+
+-- 서브쿼리로 감싸서 정렬 시도
+SELECT a."입사 월" || '월' as "입사 월"
+     , a."인원 수"
+  FROM (SELECT TO_NUMBER(TO_CHAR(e.HIREDATE, 'FMMM')) as "입사 월"
+             , COUNT(*) as "인원 수"
+          FROM emp e
+         GROUP BY TO_CHAR(e.HIREDATE, 'FMMM')
+         ORDER BY "입사 월") a
+;
