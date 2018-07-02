@@ -481,3 +481,77 @@ SELECT n.*
 -- DDL 종류의 구문은 생성 즉시 바로 커밋이 이루어짐
 -- 롤백의 시점이 이미 DDL 실행 다음 시점으로 잡힘
 
+------------------------------------------------------------
+-- TCL : Transaction Control Language
+-- 1) COMMIT
+-- 2) ROLLBACK
+
+-- 3) SAVEPOINT
+--- 1. new_member 테이블에 1행 추가
+COMMIT;
+INSERT INTO new_member(MEMBER_ID, MEMBER_NAME)
+VALUES ('M01', '홍길동')
+;
+-- 1 행 이(가) 삽입되었습니다.
+
+-- 1행 추가 상태까지 중간 저장
+SAVEPOINT do_insert; -- Savepoint이(가) 생성되었습니다.
+
+--- 2. '홍길동' 데이터의 주소를 수정
+UPDATE new_member m
+   SET m.ADDRESS = '율도국'
+ WHERE m.MEMBER_ID = 'M01'
+;
+-- 1 행 이(가) 업데이트되었습니다.
+
+-- 수정 상태까지 중간 저장
+SAVEPOINT do_update_addr; -- Savepoint이(가) 생성되었습니다.
+
+--- 3. '홍길동' 데이터의 전화번호를 수정
+UPDATE new_member m
+   SET m.PHONE = '0001'
+ WHERE m.MEMBER_ID = 'M01'
+;
+-- 1 행 이(가) 업데이트되었습니다.
+
+-- 전화번호 수정 상태까지 중간 저장
+SAVEPOINT do_update_phone; -- Savepoint이(가) 생성되었습니다.
+
+--- 4. '홍길동' 데이터의 성별을 수정
+UPDATE new_member m
+   SET m.GENDER = 'K'
+ WHERE m.MEMBER_ID = 'M01'
+;
+-- 1 행 이(가) 업데이트되었습니다.
+
+SAVEPOINT do_update_gender; -- Savepoint이(가) 생성되었습니다.
+
+-----------------------------------------------------------------
+-- 홍길동 데이터의 ROLLBACK 시나리오
+
+-- 1. 주소 수정까지는 맞는데, 전화번호, 성별 수정은 잘못됨
+--    : 되돌아가야 할 SAVEPOINT = do_update_addr
+ROLLBACK TO do_update_addr;
+SELECT * FROM new_member;
+
+-- 2. 주소, 전화번호까지 수정이 맞고, 성별 수정이 잘못됨
+ROLLBACK TO do_update_phone;
+/*
+    ORA-01086: savepoint 'DO_UPDATE_PHONE' never established in this session or is invalid
+    SAVEPOINT의 순서가 do_update_addr이 앞서기 때문에 여기까지 한번 rollback이
+    일어나면 그 후에 생성된 SAVEPOINT는 삭제됨
+    
+    앞의 수정구문 재 실행 후 다시 전화번호 수정까지 돌아감
+*/
+ROLLBACK TO do_update_phone;
+
+
+-- 3. 2번 수행 후 어디까지 롤백이 가능한가
+ROLLBACK TO do_update_addr;
+ROLLBACK TO do_insert;
+ROLLBACK;
+-- SAVEPOINT로 한번 되돌아가면 되돌아간 시점 이후
+-- 생성된 SAVEPOINT는 무효화 됨
+
+-----------------------------------------------------------------------------------------------------
+
