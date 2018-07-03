@@ -86,3 +86,41 @@ SELECT c.*
 /*--------------------------------------
 인출된 모든 행 : 0
 ---------------------------------------*/
+
+-- SEQUENCE
+-- 1)
+CREATE SEQUENCE seq_cust_userid
+START WITH 1
+MAXVALUE 99
+NOCYCLE
+;
+-- Sequence SEQ_CUST_USERID이(가) 생성되었습니다.
+
+-- 2)
+SELECT s.SEQUENCE_NAME
+     , s.MIN_VALUE
+     , s.MAX_VALUE
+     , s.CYCLE_FLAG
+     , s.INCREMENT_BY
+  FROM user_sequences s
+ WHERE s.SEQUENCE_NAME = 'SEQ_CUST_USERID'
+;
+/*---------------------------------------------------------------
+SEQUENCE_NAME,  MIN_VALUE,  MAX_VALUE,  CYCLE_FLAG, INCREMENT_BY
+-----------------------------------------------------------------
+SEQ_CUST_USERID	1	          99	        N	          1
+----------------------------------------------------------------*/
+
+-- 3)
+DROP TABLE new_customer;
+
+CREATE TABLE new_customer
+AS
+SELECT c.*
+  FROM customer c
+ WHERE 1 = 2
+;
+
+CREATE INDEX idx_cust_userid
+ON customer (userid)
+;
