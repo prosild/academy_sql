@@ -224,3 +224,118 @@ IDX_CUST_USERID	    NEW_CUSTOMER	USERID	        1	                30	           
 -----------------------------------------------------------------------------------------------------------*/
 
 -- 7)
+DROP INDEX idx_cust_userid;
+-- Index IDX_CUST_USERID이(가) 삭제되었습니다.
+
+-- 8)
+SELECT i.*
+  FROM user_ind_columns i
+ WHERE i.INDEX_NAME = 'IDX_CUST_USERID'
+;
+/*------------------------------
+인출된 모든 행 : 0
+-------------------------------*/
+
+-- PL/SQL
+-- 1)
+SET SERVEROUTPUT ON
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Hello PL/SQL World!');
+END;
+/
+/*
+Hello PL/SQL World!
+
+
+PL/SQL 프로시저가 성공적으로 완료되었습니다.
+*/
+
+-- 2)
+DECLARE
+    str VARCHAR2(20) := 'Hello PL/SQL World!';
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(str);
+END;
+/
+/*
+Hello PL/SQL World!
+
+
+PL/SQL 프로시저가 성공적으로 완료되었습니다.
+*/
+
+-- 3)
+CREATE TABLE log_table
+(   userid      VARCHAR2(20)
+  , log_date    DATE)
+;
+-- Table LOG_TABLE이(가) 생성되었습니다.
+
+CREATE OR REPLACE PROCEDURE log_execution
+IS
+    v_userid    VARCHAR2(20) := 'myid';
+BEGIN
+    INSERT INTO log_table VALUES(v_userid, sysdate);
+END log_execution;
+/
+
+EXEC log_execution;
+/*
+Procedure LOG_EXECUTION이(가) 컴파일되었습니다.
+
+
+PL/SQL 프로시저가 성공적으로 완료되었습니다.
+*/
+
+-- 4)
+CREATE OR REPLACE PROCEDURE log_execution
+(   v_log_user  IN  VARCHAR2
+  , v_log_date  OUT VARCHAR2 )
+IS
+BEGIN
+    v_log_date := sysdate;
+    INSERT INTO log_table VALUES(v_log_user, v_log_date);
+END log_execution;
+/
+
+VAR v_log_date_bind VARCHAR2(30);
+
+EXEC log_execution('myid', :v_log_date_bind);
+
+PRINT v_log_date_bind;
+/*
+PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+
+V_LOG_DATE_BIND
+--------------------------------------------------------------------------------
+18/07/03
+*/
+
+-- 5)
+CREATE OR REPLACE PROCEDURE chk_sal_per_month
+(   v_sal       IN NUMBER
+  , v_sal_month OUT NUMBER )
+IS
+BEGIN
+    v_sal_month := v_sal * 12;
+END chk_sal_per_month;
+/
+
+VAR v_month NUMBER;
+
+EXEC chk_sal_per_month(5000, :v_month);
+
+PRINT v_month;
+/*
+Procedure CHK_SAL_PER_MONTH이(가) 컴파일되었습니다.
+
+
+PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+
+   V_MONTH
+----------
+     60000
+*/
