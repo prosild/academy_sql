@@ -394,16 +394,106 @@ PR_REP	          Public Relations Representative	10500
 --8. 각 Job 별 최대급여를 받는 사람의 정보를 출력,
 --  급여가 높은 순서로 출력
 ----서브쿼리 이용
+-- a)
+SELECT e.JOB_ID
+     , MAX(e.SALARY)
+  FROM employees e
+ GROUP BY e.JOB_ID
+;
 
+-- b)
+SELECT e.JOB_ID
+     , e.FIRST_NAME
+     , e.LAST_NAME
+     , e.SALARY
+  FROM employees e
+ WHERE (e.JOB_ID, e.SALARY) IN (SELECT e.JOB_ID
+                                     , MAX(e.SALARY)
+                                  FROM employees e
+                                 GROUP BY e.JOB_ID)
+ ORDER BY e.SALARY DESC                                 
+;
 
 ----join 이용
-
+SELECT e1.JOB_ID
+     , e1.FIRST_NAME
+     , e1.LAST_NAME
+     , e1.SALARY
+  FROM employees e1 JOIN (SELECT e.JOB_ID
+                                     , MAX(e.SALARY) as "최대 급여"
+                                  FROM employees e
+                                 GROUP BY e.JOB_ID) e2
+                      ON e1.JOB_ID = e2.JOB_ID
+ WHERE e1.SALARY = e2."최대 급여"
+ ORDER BY e1.SALARY DESC                      
+;
 
 --20건
+/*-------------------------------------------
+JOB_ID,     FIRST_NAME,   LAST_NAME,  SALARY
+---------------------------------------------
+AD_PRES	    Steven	      King	      24000
+AD_VP	      Neena	        Kochhar	    17000
+AD_VP	      Lex	          De Haan	    17000
+SA_MAN	    John	        Russell	    14000
+MK_MAN	    Michael	      Hartstein	  13000
+FI_MGR	    Nancy	        Greenberg	  12008
+AC_MGR	    Shelley	      Higgins	    12008
+SA_REP	    Lisa	        Ozer	      11500
+PU_MAN	    Den	          Raphaely	  11000
+PR_REP	    Hermann	      Baer	      10000
+IT_PROG	    Alexander 	  Hunold	    9000
+FI_ACCOUNT	Daniel	      Faviet	    9000
+AC_ACCOUNT	William	      Gietz	      8300
+ST_MAN	    Adam	        Fripp	      8200
+HR_REP	    Susan	        Mavris	    6500
+MK_REP	    Pat	          Fay	        6000
+AD_ASST	    Jennifer	    Whalen	    4400
+SH_CLERK	  Nandita	      Sarchand	  4200
+ST_CLERK	  Renske	      Ladwig	    3600
+PU_CLERK	  Alexander	    Khoo	      3100
+-------------------------------------------*/
 
 --9. 7번 출력시 job_id 대신 Job_name, manager_id 대신 Manager의 last_name, department_id 대신 department_name 으로 출력
 --20건
-
+-- 직무별 최대급여를 받는 사람의 직무, 이름, 상사이름, 부서이름, 급여 
+SELECT j.JOB_TITLE        as "직무"
+     , e.FIRST_NAME       as "이름"
+     , e1.FIRST_NAME      as "상사이름"
+     , d.DEPARTMENT_NAME  as "부서이름"
+     , e.SALARY           as "급여"
+  FROM employees e JOIN jobs j ON (e.JOB_ID = j.JOB_ID)
+                   LEFT OUTER JOIN employees e1 ON (e.MANAGER_ID = e1.EMPLOYEE_ID)
+                   JOIN DEPARTMENTS d ON (e.DEPARTMENT_ID = d.DEPARTMENT_ID)
+ WHERE (e.JOB_ID, e.SALARY) IN (SELECT e.JOB_ID
+                                     , MAX(e.SALARY)
+                                  FROM employees e
+                                 GROUP BY e.JOB_ID)
+;
+/*----------------------------------------------------------------------------------
+직무,                           이름,         상사이름,     부서이름,         급여
+------------------------------------------------------------------------------------
+Programmer	                    Alexander	    Lex	          IT	              9000
+Accounting Manager	            Shelley	      Neena	        Accounting	      12008
+Public Accountant	              William	      Shelley	      Accounting	      8300
+Stock Manager	                  Adam	        Steven	      Shipping	        8200
+Purchasing Manager	            Den	          Steven	      Purchasing	      11000
+Administration Assistant	      Jennifer	    Neena	        Administration	  4400
+Administration Vice President	  Neena	        Steven	      Executive	        17000
+Administration Vice President	  Lex	          Steven	      Executive	        17000
+Shipping Clerk	                Nandita	      Adam	        Shipping	        4200
+Accountant	                    Daniel	      Nancy	        Finance         	9000
+Finance Manager	                Nancy	        Neena	        Finance	          12008
+Purchasing Clerk	              Alexander	    Den	          Purchasing	      3100
+Sales Manager	                  John	        Steven	      Sales	            14000
+Marketing Manager	              Michael	      Steven	      Marketing	        13000
+Public Relations Representative	Hermann	      Neena	        Public Relations	10000
+President	                      Steven		                  Executive	        24000
+Sales Representative	          Lisa	        Gerald	      Sales	            11500
+Marketing Representative	      Pat	          Michael     	Marketing	        6000
+Stock Clerk	                    Renske	      Shanta	      Shipping	        3600
+Human Resources Representative	Susan	        Neena	        Human Resources	  6500
+------------------------------------------------------------------------------------*/
 
 --10. 전체 직원의 급여 평균을 구하여 출력
 SELECT AVG(e.SALARY) as "급여 평균"
@@ -597,12 +687,30 @@ PR_REP	    Public Relations Representative	10000	      10000
  
 --16. Employees 테이블에서 인원수가 가장 많은 job_id를 구하고
 --   해당 job_id 의 job_title 과 그 때 직원의 인원수를 같이 출력
+-- a)
 SELECT e.JOB_ID
      , COUNT(e.JOB_ID) as "인원 수"
   FROM employees e
  GROUP BY e.JOB_ID
+ ORDER BY "인원 수" DESC
 ;
 
+--b)
+SELECT e.JOB_ID
+     , j.JOB_TITLE
+     , e."인원 수"
+  FROM (SELECT e.JOB_ID
+       , COUNT(e.JOB_ID) as "인원 수"
+          FROM employees e
+         GROUP BY e.JOB_ID
+         ORDER BY "인원 수" DESC) e JOIN jobs j ON e.JOB_ID = j.JOB_ID
+ WHERE ROWNUM = 1
+;
+/*-------------------------------------
+JOB_ID, JOB_TITLE,            인원 수
+---------------------------------------
+SA_REP	Sales Representative	30
+--------------------------------------*/
 
 --17.사번,last_name, 급여, 직책이름(job_title), 부서명(department_name), 부서매니저이름
 --  부서 위치 도시(city), 나라(country_name), 지역(region_name) 을 출력
@@ -739,51 +847,321 @@ King	      24000	  President	                            Executive		            
 -- 27건
 SELECT d.DEPARTMENT_ID
      , d.DEPARTMENT_NAME
-     , COUNT(e.EMPLOYEE_ID)
-  FROM departments d JOIN employees e ON (d.DEPARTMENT_ID = e.DEPARTMENT_ID)
- GROUP BY d.DEPARTMENT_ID
-        , d.DEPARTMENT_NAME
+     , (SELECT COUNT(*)
+          FROM employees e
+         WHERE e.DEPARTMENT_ID = d.DEPARTMENT_ID
+         GROUP BY e.DEPARTMENT_ID) as "인원 수"
+  FROM departments d
 ;
-
+/*----------------------------------------
+DEPARTMENT_ID,  DEPARTMENT_NAME,  인원 수
+------------------------------------------
+10	            Administration	  1
+20	            Marketing	        2
+30	            Purchasing	      6
+40	            Human Resources	  1
+50	            Shipping	        45
+60	            IT	              5
+70	            Public Relations	1
+80	            Sales	            34
+90	            Executive	        3
+100	            Finance	          6
+110	            Accounting	      2
+120	            Treasury	
+130	            Corporate Tax	
+140	            Control And Credit	
+150	            Shareholder Services	
+160	            Benefits	
+170	            Manufacturing	
+180	            Construction	
+190	            Contracting	
+200	            Operations	
+210	            IT Support	
+220	            NOC	
+230	            IT Helpdesk	
+240	            Government Sales	
+250	            Retail Sales	
+260	            Recruiting	
+270	            Payroll	
+--------------------------------------*/
 
 --19.인원이 가장 많은 상위 다섯 부서아이디, 부서명, 인원수 목록 출력
 -- 5건
-
+-- a)
+SELECT d.DEPARTMENT_ID
+     , d.DEPARTMENT_NAME
+     , (SELECT COUNT(*)
+          FROM employees e
+         WHERE e.DEPARTMENT_ID = d.DEPARTMENT_ID
+         GROUP BY e.DEPARTMENT_ID) as "인원 수"
+  FROM departments d 
+ ORDER BY "인원 수" DESC
+;
+-- b)
+SELECT a.*
+  FROM (SELECT d.DEPARTMENT_ID
+             , d.DEPARTMENT_NAME
+             , (SELECT COUNT(*)
+                  FROM employees e
+                 WHERE e.DEPARTMENT_ID = d.DEPARTMENT_ID
+                 GROUP BY e.DEPARTMENT_ID) as "인원 수"
+          FROM departments d 
+         ORDER BY "인원 수" DESC) a
+ WHERE a."인원 수" IS NOT NULL
+   AND ROWNUM <= 5
+;
+/*--------------------------------------
+DEPARTMENT_ID, DEPARTMENT_NAME, 인원 수
+----------------------------------------
+50	           Shipping	        45
+80	           Sales	          34
+30	           Purchasing	      6
+100	           Finance	        6
+60	           IT	              5
+--------------------------------------*/
  
 --20. 부서별, 직책별 평균 급여를 구하여라.
 --   부서이름, 직책이름, 평균급여 소수점 둘째자리에서 반올림으로 구하여라.
 -- 19건
 
-
+SELECT d.DEPARTMENT_NAME as "부서이름"
+     , j.JOB_TITLE       as "직책이름"
+     , TO_CHAR(AVG(e.SALARY), '$9,999,999.00') as "평균급여"
+  FROM employees e JOIN departments d ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+                   JOIN jobs j ON e.JOB_ID = j.JOB_ID
+ GROUP BY d.DEPARTMENT_NAME
+        , j.JOB_TITLE
+;
+/*------------------------------------------------------------------------------
+부서이름,                   직책이름,                       평균급여
+Administration	            Administration Assistant	      $4,400.00
+Shipping	                  Stock Manager	                  $7,280.00
+Accounting	                Public Accountant	              $8,300.00
+Marketing	                  Marketing Manager	              $13,000.00
+Finance                    	Finance Manager	                $12,008.00
+Marketing                 	Marketing Representative	      $6,000.00
+Human Resources           	Human Resources Representative	$6,500.00
+Sales	                      Sales Manager	                  $12,200.00
+Executive	Administration    Vice President	                $17,000.00
+Shipping	                  Shipping Clerk	                $3,215.00
+Public Relations	          Public Relations Representative	$10,000.00
+Sales	                      Sales Representative	          $8,396.55
+Executive	                  President	                      $24,000.00
+Shipping	                  Stock Clerk	                    $2,785.00
+Purchasing	                Purchasing Manager	            $11,000.00
+Purchasing	                Purchasing Clerk	              $2,780.00
+IT	                        Programmer	                    $5,760.00
+Finance	                    Accountant	                    $7,920.00
+Accounting	                Accounting Manager	            $12,008.00
+-------------------------------------------------------------------------------*/
 --21.각 부서의 정보를 부서매니저 이름과 함께 출력(부서는 모두 출력되어야 함)
 -- 27건
-
+SELECT d.*
+     , e.FIRST_NAME as "매니저이름"
+  FROM departments d LEFT OUTER JOIN employees e ON d.MANAGER_ID = e.EMPLOYEE_ID
+;
+/*--------------------------------------------------------------------
+DEPARTMENT_ID,  DEPARTMENT_NAME,  MANAGER_ID, LOCATION_ID,  매니저이름
+----------------------------------------------------------------------
+70	            Public Relations	204	        2700	        Hermann
+50	            Shipping	        121	        1500	        Adam
+100	            Finance	          108       	1700	        Nancy
+20	            Marketing	        201	        1800	        Michael
+110	            Accounting	      205	        1700	        Shelley
+60	            IT	              103	        1400	        Alexander
+90	            Executive	        100	        1700	        Steven
+40	            Human Resources	  203	        2400	        Susan
+30	            Purchasing	      114	        1700	        Den
+80	            Sales	            145	        2500	        John
+10	            Administration	  200	        1700	        Jennifer
+270	            Payroll		                    1700	
+260	            Recruiting		                1700	
+250	            Retail Sales		              1700	
+240	            Government Sales		          1700	
+230	            IT Helpdesk		                1700	
+220	            NOC		                        1700	
+210	            IT Support		                1700	
+200	            Operations		                1700	
+190	            Contracting		                1700	
+180	            Construction		              1700	
+170	            Manufacturing		              1700	
+160	            Benefits		                  1700	
+150	            Shareholder Services	        1700	
+140	            Control And Credit		        1700	
+130	            Corporate Tax		              1700	
+120	            Treasury		                  1700	
+----------------------------------------------------------------------*/
  
 --22. 부서가 가장 많은 도시이름을 출력
+-- a)
+SELECT d.LOCATION_ID
+     , COUNT(*)   "도시 수"
+  FROM departments d
+ GROUP BY d.LOCATION_ID
+ ORDER BY "도시 수" DESC
+;
 
-
+-- b)
+SELECT l.CITY
+  FROM (SELECT d.LOCATION_ID
+             , COUNT(*)   "부서 수"
+          FROM departments d
+         GROUP BY d.LOCATION_ID
+         ORDER BY "부서 수" DESC) d JOIN locations l ON (d.LOCATION_ID = l.LOCATION_ID)
+ WHERE ROWNUM = 1
+;
+/*------
+Seattle
+-------*/
 
 --23. 부서가 없는 도시 목록 출력
 -- 16건
 --조인사용
-
+SELECT l.CITY
+     , d.DEPARTMENT_NAME
+  FROM locations l LEFT OUTER JOIN departments d ON l.LOCATION_ID = d.LOCATION_ID
+ WHERE d.DEPARTMENT_ID IS NULL
+;
 --집합연산 사용
+SELECT l.CITY
+     , d.DEPARTMENT_NAME
+  FROM locations l LEFT OUTER JOIN departments d ON l.LOCATION_ID = d.LOCATION_ID
+ MINUS
+SELECT l.CITY
+     , d.DEPARTMENT_NAME
+  FROM locations l JOIN departments d ON l.LOCATION_ID = d.LOCATION_ID
+;
 
 --서브쿼리 사용
+SELECT l.CITY
+  FROM locations l
+ WHERE NOT l.LOCATION_ID IN (SELECT d.LOCATION_ID
+                          FROM departments d
+                         GROUP BY d.LOCATION_ID)
+;
 
+/*---------------------------------
+CITY,               DEPARTMENT_NAME
+-----------------------------------
+Beijing	
+Bern	
+Tokyo	
+Sydney	
+Utrecht	
+South Brunswick	
+Bombay	
+Geneva	
+Sao Paulo	
+Venice	
+Whitehorse	
+Singapore	
+Hiroshima	
+Stretford	
+Roma	
+Mexico City	
+----------------------------------*/
   
 --24.평균 급여가 가장 높은 부서명을 출력
-
-
+SELECT d.*
+  FROM (SELECT d.DEPARTMENT_NAME                     AS "부서명"
+             , TO_CHAR(AVG(e.SALARY), '$999,999.00') AS "평균 급여"
+          FROM employees e JOIN departments d ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+         GROUP BY d.DEPARTMENT_NAME
+         ORDER BY "평균 급여" DESC) d
+ WHERE ROWNUM = 1
+;
+/*---------------------
+Executive	  $19,333.33
+----------------------*/
 
 --25. Finance 부서의 평균 급여보다 높은 급여를 받는 직원의 목록 출력
 -- 28건
+-- a)
+SELECT AVG(e.SALARY)
+  FROM employees e JOIN departments d ON (e.DEPARTMENT_ID = d.DEPARTMENT_ID)
+ WHERE d.DEPARTMENT_NAME = 'Finance'
+ GROUP BY d.DEPARTMENT_ID
+;
 
+--b)
+SELECT e.LAST_NAME 
+  FROM employees e
+ WHERE e.SALARY > (SELECT AVG(e.SALARY)
+                     FROM employees e JOIN departments d ON (e.DEPARTMENT_ID = d.DEPARTMENT_ID)
+                    WHERE d.DEPARTMENT_NAME = 'Finance'
+                    GROUP BY d.DEPARTMENT_ID)
+;
+/*--------
+King
+Kochhar
+De Haan
+Hunold
+Greenberg
+Faviet
+Raphaely
+Russell
+Partners
+Errazuriz
+Cambrault
+Zlotkey
+Tucker
+Bernstein
+Hall
+King
+Sully
+McEwen
+Vishney
+Greene
+Ozer
+Bloom
+Fox
+Abel
+Hutton
+Hartstein
+Baer
+Higgins
+---------*/
 
 -- 26. 각 부서별 인원수를 출력하되, 인원이 없는 부서는 0으로 나와야 하며
 --     부서는 정식 명칭으로 출력하고 인원이 많은 순서로 정렬.
 -- 27건
-
+SELECT d.DEPARTMENT_NAME      as "부서명"
+     , COUNT(e.DEPARTMENT_ID) as "인원 수"
+  FROM employees e RIGHT OUTER JOIN departments d ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+ GROUP BY d.DEPARTMENT_NAME
+ ORDER BY "인원 수" DESC
+;
+/*--------------------------------
+부서 명,                  인원 수
+----------------------------------
+Shipping	                45
+Sales	                    34
+Finance	                  6
+Purchasing	              6
+IT	                      5
+Executive	                3
+Marketing	                2
+Accounting	              2
+Public Relations	        1
+Administration	          1
+Human Resources	          1
+Control And Credit	      0
+Shareholder Services	    0
+IT Helpdesk	              0
+Operations	              0
+Payroll	                  0
+Recruiting	              0
+Retail Sales	            0
+NOC	                      0
+Contracting	              0
+Corporate Tax	            0
+Benefits	                0
+Government Sales	        0
+Construction	            0
+Manufacturing	            0 
+IT Support	              0
+Treasury	                0
+----------------------------------*/
 
 --27. 지역별 등록된 나라의 갯수 출력(지역이름, 등록된 나라의 갯수)
 -- 4건
